@@ -31,6 +31,7 @@ __status__ = "Testing / pre-production" # "Production"
 import re
 import os
 import sys
+import json
 import argparse
 ## import xlrd
 from yattag import Doc, indent
@@ -39,6 +40,7 @@ import numpy as np
 from rich import print
 from conf.langtags import fetch_langtags_data
 from conf.langtags import get_correspondent_tag
+from conf.langtags import get_langtags_in_convention
 ## import openpyxl
 # from pprint import pprint as print
 # import xml.dom.minidom
@@ -53,7 +55,8 @@ languages the workbook has."
 parser = argparse.ArgumentParser(description=text)
 parser.add_argument("-V", "--version", help="show program version",
                     action="store_true")
-parser.add_argument("-i", "--input", help="specify path to input file")
+parser.add_argument("-i", "--input", help="specify path to mandatory input file")
+parser.add_argument("-c", "--config", help="specify path to optional config file")
 
 # read arguments from the command line
 args = parser.parse_args()
@@ -63,33 +66,57 @@ if args.version:
     print("This is program TM Workbook Converter version 0.2")
     sys.exit()
 
-if args.input:
-    print("Processing %s" % args.input)
+if not os.path.exists(args.input):
+    print(f"Input file '{args.input}' not found.")
+    sys.exit()
+elif args.input:
+    print(f"Processing file '{os.path.basename(args.input)}'.")
     path_to_wb = args.input.rstrip('/')
 else:
     print("Argument -i not found.")
     sys.exit()
 
+if args.config and os.path.basename(args.config) == "config.json":
+    print(f"Using configuration from '{args.config}'.")
+    config_fpath = args.config
+
 # ############# FUNCTIONS #####################################################
+
+def get_config(wb):
+
+    if args.config: # config.json
+        with open(config_fpath) as json_file:
+            return json.load(json_file)
+    elif "config" in wb.sheet_names:
+        print("Read configuration from from 'config' sheet in workbook.")
+        # only if config.json was not provided as arg
+        return read_config_sheet(wb)
+    else:
+        print("ERROR: Configuration not provided")
+
+
+def get_worksheet(wb, config):
+    # if the extraction sheet is not specified,
+    if config["worksheet"] is None:
+    # and there are only two sheets, then use the one that is not config
+        print(f"{wb.sheet_names=}")
+        if len(wb.sheet_names) == 1:
+            return wb.sheet_names[0]
+        elif len(wb.sheet_names) == 2 and "config" in wb.sheet_names:
+            return wb.sheet_names[1] if wb.sheet_names[0] == "config" else wb.sheet_names[0]
+        # if there are more or just config, then fail
+        else:
+            print("ERROR: The worksheet to be extracted is not specified in config")
+            sys.exit()
+    return config["worksheet"]
+
 
 def get_langtags():
     # langtags = pd.read_csv(langtags_csv)
     return fetch_langtags_data('https://capps.capstan.be/langtags_json.php')
-    
-
-def map_langtag_loc(df, tag, xfrom, xto):
-    # print(langtags.loc[langtags.cApStAn == x, 'OmegaT'].values[0])
-    return df.loc[df[xfrom] == tag, xto].values[0]
 
 
-def map_langtag(df, tag, xfrom, xto):
-    # langtags_dict = dict(zip(langtags['cApStAn'], langtags['OmegaT']))
-    langtags_dict = dict(zip(df[xfrom], df[xto]))
-    return langtags_dict[tag]
-
-
-def get_config(wb):
-    
+def read_config_sheet(wb):
     config_sheet = wb.parse("config").replace(np.nan, None)
     ## sheet = wb.sheet_by_index(sheet_idx)
     parameters = config_sheet['KEY']
@@ -151,10 +178,13 @@ def build_tmx(langpair_set, xml_source_lang, xml_target_lang):
     return tmx_output  # .replace("o_tmf=", "o-tmf=")
 
 
-def get_langs(columns, config):
+def get_lang_headers(columns, config):
     if config["langtag_convention"] == "cApStAn":
-        return [x for x in columns
-            if re.match(r'[a-z]{3}-[A-Z]{3}', x) and x != config['source_lang']]
+        return [tag for tag in columns
+            if re.match(r'[a-z]{3}-[A-Z]{3}', tag) and tag != config['source_lang']]
+    else:
+        return [tag for tag in columns
+            if tag in bcp47_langtags and tag != config['source_lang']]
 
 
 def write_tmx_file(config, tmx_output):
@@ -182,27 +212,17 @@ def convert_wb_to_tmx_files(path_to_file):
     # wb = openpyxl.load_workbook(path_to_file)
 
     # df = pd.read_excel(path_to_file)
+
     wb = pd.ExcelFile(path_to_file)
 
-    if "config" in wb.sheet_names:
-        # only if config.json was not provided as arg
-        config = get_config(wb)
-        print(f"{config=}")
-        # if the extraction sheet is not specified, 
-        if config["worksheet"] is None:
-            # and there are only two sheets, then use the one that is not config
-            if len(wb.sheet_names) == 2:
-                worksheet = wb.sheet_names[1] if wb.sheet_names[0] == "config" else wb.sheet_names[0]
-            # if there are more or just config, then fail
-            else:
-                print("ERROR: The worksheet to be extracted is not specified in config")
-                return
-    else:
-        print("TODO: USE CONFIG.JSON")
-    
-    if config['source_lang'] is None:
+    config = get_config(wb)
+
+    if config['source_lang'] is None: ## checks
         print("ERROR: The source language column is not specified in config")
-        return
+        sys.exit()
+
+    worksheet = get_worksheet(wb, config)
+    print(f"{worksheet=}")
 
     columns = get_headers(wb, worksheet) # assuming config is 0
     print(f"{columns=}")
@@ -213,10 +233,9 @@ def convert_wb_to_tmx_files(path_to_file):
         return
 
     source_col = config['source_lang']
-    lang_list = get_langs(columns, config)
+    print(f"{source_col=}")
+    lang_list = get_lang_headers(columns, config)
     print(f"{lang_list=}")
-
-    langtags = get_langtags()
 
     bcp47_source_langtag = get_correspondent_tag(
         langtags, config['source_lang'], config['langtag_convention'], "BCP47"
@@ -226,6 +245,7 @@ def convert_wb_to_tmx_files(path_to_file):
     # convert_colpair_to_tmx_file() for index, column in cols if column in lang_list
     for index, column in enumerate(columns):
         if column in lang_list: # this excludes notes etc.
+            print("-----------")
             print(f"{index=}: {column=}")
             # configuration of this language pair
             lang_config = dict(config, target_lang=column)  # update dict without modify original dictionary
@@ -237,17 +257,18 @@ def convert_wb_to_tmx_files(path_to_file):
             if bcp47_target_langtag is None:
                 print("""ERROR: The target language {bcp47_target_lang} is not recognized""")
                 continue
-            print("-----------")
 
             langpair_set = get_data(wb, worksheet, source_col=source_col, target_col=column)
             tmx_output = build_tmx(langpair_set, bcp47_source_langtag, bcp47_target_langtag)
             write_tmx_file(lang_config, tmx_output)
-            
+
 
 
 # ############# EXECUTION #####################################################
 
 if __name__ == "__main__":
+    langtags = get_langtags()
+    bcp47_langtags = get_langtags_in_convention(langtags, "BCP47")
     convert_wb_to_tmx_files(path_to_wb)
 
 
@@ -256,7 +277,7 @@ if __name__ == "__main__":
 # if config["langtag_convention"] is None, then BCP47 should be assumed
 # use the langtags api
 # add option to use config.json
-# use a default config in function get_config (if neither config sheet nor config json are found)
+# use a default config in function read_config_sheet (if neither config sheet nor config json are found)
 # add logging
-# add other conventions to funcion get_langs
+# add other conventions to funcion get_lang_headers
 # add if convention is not capstan, it must be BCP47, in that case all headers should be found in the list of BCP47 tags
