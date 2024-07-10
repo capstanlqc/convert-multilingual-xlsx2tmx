@@ -1,0 +1,15 @@
+{
+    "container": "PISA",
+    "langtag_convention": "BCP47",
+    "source_lang": "en",
+    "tmx_file_names": "<container>, <target_lang>, TM",
+    "segmentation": true,
+    "remove_html_tags": true,
+    "remove_linebreaks": false,
+    "remove_multiple_spaces": false,
+    "remove_pattern": "il+egal phrases?",
+    "ofuscate_pattern": "(private|sensitive) data",
+    "ignore_cell_pattern": "(remove|delete)",
+    "header_row": 0,
+    "comment_column": "D"
+}
