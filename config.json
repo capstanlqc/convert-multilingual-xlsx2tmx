@@ -10,6 +10,7 @@
     "remove_pattern": "il+egal phrases?",
     "ofuscate_pattern": "(private|sensitive) data",
     "ignore_cell_pattern": "(remove|delete)",
+    "worksheet": "QUESTIONNAIRE",
     "header_row": 0,
     "comment_column": "D"
 }
