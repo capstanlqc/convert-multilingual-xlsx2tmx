@@ -15,9 +15,17 @@ This script converts a bilingual or multilingual workbook into as many TMX files
 | 20240710  | Refactored the original scritp using pandas consistently | Manuel |
 | 20240711  | Added argument `--config` (or `-c`) to use `config.json` (if provided, it overrides `config` worksheet) | Manuel |
 
+## Getting started
 
-## Execution 
+Clone [this repo](https://github.com/capstanlqc/convert-multilingual-xlsx2tmx) and install dependencies in a virtual environment:
 
+```
+gh repo clone capstanlqc/convert-multilingual-xlsx2tmx
+cd convert-multilingual-xlsx2tmx
+python3.11 -m venv venv
+source venv/bin/activate
+python3.11 -m pip install -r requirements.txt
+```
 To know how to run this utility:
 ```
 python3.11 conv_xls2tmx.py --help
