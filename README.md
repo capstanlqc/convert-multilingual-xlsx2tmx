@@ -17,18 +17,16 @@ This script converts a bilingual or multilingual workbook into as many TMX files
 
 ## Getting started
 
-Clone [this repo](https://github.com/capstanlqc/convert-multilingual-xlsx2tmx) and install dependencies in a virtual environment:
+Clone [this repo](https://github.com/capstanlqc/convert-multilingual-xlsx2tmx) and install dependencies in a virtual environment using the python version specified in `.python-version` (recommended: use pyenv):
 
 ```
 gh repo clone capstanlqc/convert-multilingual-xlsx2tmx
 cd convert-multilingual-xlsx2tmx
-python3.11 -m venv venv
-source venv/bin/activate
-python3.11 -m pip install -r requirements.txt
+python -m venv venv && source venv/bin/activate && pip install -r requirements.txt
 ```
 To know how to run this utility:
 ```
-python3.11 conv_xls2tmx.py --help
+python conv_xls2tmx.py --help
 ```
 
 ## Configuration 
