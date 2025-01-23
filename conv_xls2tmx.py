@@ -92,7 +92,7 @@ def get_config(wb):
         # only if config.json was not provided as arg
         return read_config_sheet(wb)
     else:
-        print("ERROR: Configuration not provided")
+        raise ValueError("Configuration not provided: either specify a 'config.json' file or include a 'config' sheet in the workbook.")
 
 
 def get_worksheet(wb, config):
@@ -215,11 +215,13 @@ def convert_wb_to_tmx_files(path_to_file):
 
     wb = pd.ExcelFile(path_to_file)
 
-    config = get_config(wb)
-
-    if config['source_lang'] is None: ## checks
-        print("ERROR: The source language column is not specified in config")
-        sys.exit()
+    try:
+        config = get_config(wb)
+        if config['source_lang'] is None:
+            raise ValueError("The 'source_lang' field in the configuration is missing.")
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)  # exit the script gracefully
 
     worksheet = get_worksheet(wb, config)
     print(f"{worksheet=}")
