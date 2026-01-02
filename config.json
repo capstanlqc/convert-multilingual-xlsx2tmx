@@ -8,7 +8,7 @@
     "remove_linebreaks": false,
     "remove_multiple_spaces": false,
     "remove_pattern": "il+egal phrases?",
-    "ofuscate_pattern": "(private|sensitive) data",
+    "obfuscate_pattern": "(private|sensitive) data",
     "ignore_cell_pattern": "(remove|delete)",
     "worksheet": "QUESTIONNAIRE",
     "header_row": 0,
