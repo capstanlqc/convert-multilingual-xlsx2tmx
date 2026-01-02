@@ -37,17 +37,17 @@ The following `config` values are expected:
 
 
 | KEY                    | VALUE                            | DESCRIPTION |
-|:--------------------	|:-------------------------------	|:-------------	|
-| container           	| `<container>`                   	| String: Add the the name of the actual container (case-sensitive). It needs to exist in the containers manager.   |
-| langtag_convention   	| cApStAn                        	| String. Convention used for language codes, it can be cApStAn or BCP47. If empty, BCP47 will be assumed as default. |
-| source_lang         	| eng-ZZZ                        	| String: Mandatory code in the  `<langtag_convention>` specified. |
+|:-----------------------|:-------------------------------	|:-------------	|
+| container           	  | `<container>`                   	| String: Add the the name of the actual container (case-sensitive). It needs to exist in the containers manager.   |
+| langtag_convention   	 | cApStAn                        	| String. Convention used for language codes, it can be cApStAn or BCP47. If empty, BCP47 will be assumed as default. |
+| source_lang         	  | eng-ZZZ                        	| String: Mandatory code in the  `<langtag_convention>` specified. |
 | tmx_file_names         | `<container>`, `<target_lang>`, `TM` | List of comma-separated strings: List all elements that should be included in the name of the TMX   files. Container must be the first one and they must appear in order   (separated by commas). Placeholders (e.g. `<this>`) refer to keys in   this config sheet (first column). All elements in this list will be joined   with underscore, e.g. `<container>_<xxx-XXX>_TM.tmx`. For example, if you want   to include word "QQ" between container and language, this cell   should contain `<container>, QQ, <target_lang>, TM`, which will produce   `<container>_QQ_<xxx-XXX>_TM.tmx`.    |
 | segmentation           | yes                              | Boolean: Contents of cells will be segmented if possible (if the same number of   sentences, line breaks, etc. is found on both languages)        |
 | remove_html_tags       | yes                              | Boolean: Parts of the text matched by `<[^>]+>` will be removed.        |
 | remove_linebreaks      | no                               | Boolean: Linebreaks (i.e. `[^\r\n]+`) will be removed withing translation units.    |
 | remove_multiple_spaces | no                               | Boolean: Double or multiple normal spaces will be replaced by one single space.    |
 | remove_pattern         |                                  | Regex: Parts of the text matched by this expression will be removed. For example   if you wanted to have parts like “[[Privacy_Policy.ENG.pdf\|προστασία της   ιδιωτικής ζωής]]” or "((*\|Meetings include online meetings))"   removed, the remove pattern should be something like `\[\[[^\]]+\]\]` or   `\(\([^)]+\)\)`, respectively. You (or the PM) don’t have to write that, you   can just provide examples and an explanation.   |
-| ofuscate_pattern       |                                  | Regex: Parts of the text matched by this expression will be ofuscated, e.g. Xxxxxx                                  |
+| obfuscate_pattern      |                                  | Regex: Parts of the text matched by this expression will be ofuscated, e.g. Xxxxxx                                  |
 | ignore_cell_pattern    |                                  | Regex: Cells matched by this expression will not be included in the TMX file.    |
 | worksheet              | FOO              | String. The name of the worksheet containing the translations. This value is mandatory if there are more than one worksheet, but it can be left empty if there’s only one worksheet (other than this ‘config’). | 
 | header_row             | 0                                | Integer: Indicate the row containing the language codes. Starts with index 0 (row 1). **DEPRECATED**: Value 0 (first row) is mandatory.  |
