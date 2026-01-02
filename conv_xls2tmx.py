@@ -80,7 +80,7 @@ if args.config and os.path.basename(args.config) == "config.json":
     print(f"Using configuration from '{args.config}'.")
     config_fpath = args.config
 
-# ############# FUNCTIONS #####################################################
+# ############# FUNCTIONS #####################################################
 
 def get_config(wb):
 
@@ -127,9 +127,8 @@ def read_config_sheet(wb):
 def get_data(wb, sheet_name, source_col, target_col):
     # sheet = wb.sheet_by_index(sheet_idx)
     df = wb.parse(sheet_name)
-    source_texts = df[source_col]
-    target_texts = df[target_col]
-    return set(zip(source_texts, target_texts))
+    df = df[df[target_col].notna()]
+    return set(zip(df[source_col], df[target_col]))
 
 
 def get_headers(wb, sheet_name):
