@@ -12,5 +12,7 @@
     "ignore_cell_pattern": "(remove|delete)",
     "worksheet": "QUESTIONNAIRE",
     "header_row": 0,
-    "comment_column": "D"
+    "comment_column": "D",
+    "remove_whitespace": true,
+    "indent_tmx": false
 }

@@ -29,10 +29,10 @@ def get_tags_with_language_subtag(data, language_subtag):
 def get_region_subtags_for_language(data, language_subtag):
 	return [tag['cApStAn'].split('-')[1] for tag in data if tag['cApStAn'].startswith(language_subtag + '-')]
 
-def get_langtags_in_convention(data, convention):
-	if convention not in data[0].keys():
-		print(f"Unknown convention: {convention}")
-	return [entry[convention] for entry in data]
+def get_langtags_in_scheme(data, scheme):
+	if scheme not in data[0].keys():
+		print(f"Unknown convention: {scheme}")
+	return [entry[scheme] for entry in data]
 
 # ==== Calls ==== 
 
