@@ -61,9 +61,9 @@ batch_conf = df.to_dict(orient="records")
 
 for file in batch_conf:
     excel_fpath = Path(file["path"])
-    config["worksheet"] = file["sheet"]
-    config["source_lang"] = file["source"]
-    config["container"] = file["stem"]
+    # config["worksheet"] = file["sheet"]
+    config["source_column"] = file["source_col"]
+    # config["container"] = file["stem"]
 
     print(config)
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=True) as tmp:
