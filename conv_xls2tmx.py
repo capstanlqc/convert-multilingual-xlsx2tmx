@@ -29,7 +29,7 @@ __status__ = "Testing / pre-production" # "Production"
 # ############# IMPORTS ###########################################
 
 import regex as re
-from typing import Dict
+from typing import Dict, Optional
 from pathlib import Path
 import os
 import sys
@@ -217,7 +217,7 @@ def main():
             return [tag for tag in columns
                     if tag in bcp47_langtags and tag != config['source_lang']]
 
-    def write_tmx_file(config, tmx_output):
+    def write_tmx_file(config: Dict, tmx_data, output_dpath: Optional[Path] = None):
         # build filename
         config['tmx_file_names'] = config['tmx_file_names'].replace('<', '').replace('>', '')
         fn_parts = [config[x.strip()] if x.strip() in config.keys()
@@ -226,14 +226,14 @@ def main():
 
         # writing output
         filename = "_".join(fn_parts) + ".tmx"
-        output_dir = "output"
-        output_tmx_fpath = Path.cwd() / output_dir / filename
+        output_dpath = output_dpath or Path.cwd() / "output"
+        output_tmx_fpath = output_dpath / filename
 
-        os.makedirs(output_dir) if not os.path.exists(output_dir) else None
+        os.makedirs(output_dpath) if not os.path.exists(output_dpath) else None
 
         with open(output_tmx_fpath, "w", encoding="utf-8") as f:
             print(f"Writing TMX output to file '{output_tmx_fpath}'")
-            f.write(tmx_output)
+            f.write(tmx_data)
 
     # all source language variables should be global!: path_to_file, wb, langtags
     def convert_wb_to_tmx_files(config_fpath, path_to_file):
@@ -293,7 +293,7 @@ def main():
 
                 langpair_set = get_data(wb, worksheet, source_col=source_col, target_col=column)
                 tmx_output = build_tmx(langpair_set, bcp47_source_langtag, bcp47_target_langtag, config)
-                write_tmx_file(lang_config, tmx_output)
+                write_tmx_file(lang_config, tmx_output, path_to_file.parent)
 
     # ############# EXECUTION #####################################################
     langtags = get_langtags()
@@ -306,11 +306,10 @@ if __name__ == "__main__":
 
 
 # todo:
-# use bcp47 convention, or add convention key to config
 # if config["langtag_scheme"] is None, then BCP47 should be assumed
 # use the langtags api
 # add option to use config.json
 # use a default config in function read_config_sheet (if neither config sheet nor config json are found)
 # add logging
-# add other conventions to funcion get_lang_headers
+# add other conventions to function get_lang_headers
 # add if convention is not capstan, it must be BCP47, in that case all headers should be found in the list of BCP47 tags
